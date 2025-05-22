@@ -1,4 +1,4 @@
-module github.com/libdns/transip
+module github.com/Appeltabak/transip
 
 go 1.14
 
