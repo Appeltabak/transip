@@ -12,8 +12,8 @@ import (
 func (p *Provider) setupRepository() error {
 	if p.repository == nil {
 		client, err := gotransip.NewClient(gotransip.ClientConfiguration{
-			AccountName:	p.AccountName,
-			PrivateKeyPath:	p.PrivateKeyPath,
+			AccountName:    p.AccountName,
+			PrivateKeyPath: p.PrivateKeyPath,
 		})
 		if err != nil {
 			return err
@@ -32,7 +32,7 @@ func (p *Provider) getDNSEntries(ctx context.Context, domain string) ([]libdns.R
 	if err != nil {
 		return nil, err
 	}
-	
+
 	var records []libdns.Record
 	var dnsEntries []transipdomain.DNSEntry
 
@@ -42,11 +42,11 @@ func (p *Provider) getDNSEntries(ctx context.Context, domain string) ([]libdns.R
 	}
 
 	for _, entry := range dnsEntries {
-		record := libdns.Record{
-			Name:  entry.Name,
-			Value: entry.Content,
-			Type:  entry.Type,
-			TTL:   time.Duration(entry.Expire) * time.Second,
+		record := libdns.RR{
+			Name: entry.Name,
+			Data: entry.Content,
+			Type: entry.Type,
+			TTL:  time.Duration(entry.Expire) * time.Second,
 		}
 		records = append(records, record)
 	}
@@ -60,19 +60,19 @@ func (p *Provider) addDNSEntry(ctx context.Context, domain string, record libdns
 
 	err := p.setupRepository()
 	if err != nil {
-		return libdns.Record{}, err
+		return record.RR(), err
 	}
 
 	entry := transipdomain.DNSEntry{
-		Name:    record.Name,
-		Content: record.Value,
-		Type:    record.Type,
-		Expire:  int(record.TTL.Seconds()),
+		Name:    record.RR().Name,
+		Content: record.RR().Data,
+		Type:    record.RR().Type,
+		Expire:  int(record.RR().TTL.Seconds()),
 	}
 
 	err = p.repository.AddDNSEntry(domain, entry)
 	if err != nil {
-		return libdns.Record{}, err
+		return record.RR(), err
 	}
 
 	return record, nil
@@ -84,19 +84,19 @@ func (p *Provider) removeDNSEntry(ctx context.Context, domain string, record lib
 
 	err := p.setupRepository()
 	if err != nil {
-		return libdns.Record{}, err
+		return nil, err
 	}
 
 	entry := transipdomain.DNSEntry{
-		Name:    record.Name,
-		Content: record.Value,
-		Type:    record.Type,
-		Expire:  int(record.TTL.Seconds()),
+		Name:    record.RR().Name,
+		Content: record.RR().Data,
+		Type:    record.RR().Type,
+		Expire:  int(record.RR().TTL.Seconds()),
 	}
 
 	err = p.repository.RemoveDNSEntry(domain, entry)
 	if err != nil {
-		return libdns.Record{}, err
+		return nil, err
 	}
 
 	return record, nil
@@ -108,19 +108,19 @@ func (p *Provider) updateDNSEntry(ctx context.Context, domain string, record lib
 
 	err := p.setupRepository()
 	if err != nil {
-		return libdns.Record{}, err
+		return nil, err
 	}
 
 	entry := transipdomain.DNSEntry{
-		Name:    record.Name,
-		Content: record.Value,
-		Type:    record.Type,
-		Expire:  int(record.TTL.Seconds()),
+		Name:    record.RR().Name,
+		Content: record.RR().Data,
+		Type:    record.RR().Type,
+		Expire:  int(record.RR().TTL.Seconds()),
 	}
 
 	err = p.repository.UpdateDNSEntry(domain, entry)
 	if err != nil {
-		return libdns.Record{}, err
+		return nil, err
 	}
 
 	return record, nil
